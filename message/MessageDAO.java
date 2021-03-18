@@ -17,7 +17,7 @@ public class MessageDAO {
 	   PreparedStatement pstmt = null;
 	   ResultSet rs = null;
 	
-	   
+	   //1.메세지 목록
 	   public List<MessageVO>list(PageObject pageObject) throws Exception{
 	      List<MessageVO> list=null;
 	      
@@ -58,7 +58,7 @@ public class MessageDAO {
 	      return list;
 	}//end of list
 	   
-	   
+	   //1-1.데이터 가져오기
 	   public long getTotalRow() throws Exception{
 		   long result = 0;
 		   
@@ -82,6 +82,7 @@ public class MessageDAO {
 		   
 	   }//end of getTotalRow
 	   
+	   //2-1.메세지 읽기
 	   public MessageVO view(long no) throws Exception {
 		   MessageVO vo = null;
 		   
@@ -111,7 +112,7 @@ public class MessageDAO {
 		   
 	   }
 	   
-	   //읽음처리 
+	   //2-2.읽음처리 
 	   public int viewReaded(MessageVO vo) throws Exception {
 		   int result = 0;
 		   
@@ -134,6 +135,7 @@ public class MessageDAO {
 		   
 	   }
 	   
+	   //3.메세지 쓰기
 	   public int write(MessageVO vo) throws Exception {
 		   int result=0;
 		   
@@ -157,7 +159,7 @@ public class MessageDAO {
 		   
 	   }
 	   
-	   
+	   //4.메세지 지우기
 	   public int delete(long no) throws Exception {
 		   int result=0;
 		   
@@ -176,6 +178,31 @@ public class MessageDAO {
 		   }
 		   
 		   return result;
+		   
+	   }
+	   
+	   //5.새로운 메세지 갯수 가져오기
+	   public Long getMessageCnt(String id) throws Exception {
+		   Long cnt = 0L;
+		   
+		   try {
+			   con=DBInfo.getConnection();
+			   pstmt=con.prepareStatement(DBSQL.MESSAGE_GET_MESSAGE_CNT);
+			   pstmt.setString(1,id);
+			   
+			   rs = pstmt.executeQuery();
+			   if(rs != null && rs.next()) {
+				   cnt = rs.getLong(1);
+			   }
+		   } catch (Exception e) {
+			   // TODO: handle exception
+			   e.printStackTrace();
+			   throw new Exception("새로운 메세지 갯수 DB처리중 오류");
+		   }finally {
+			   DBInfo.close(con, pstmt,rs);
+		   }
+		   System.out.println("MessageDAO.getMessageCnt().cnt :" + cnt);
+		   return cnt;
 		   
 	   }
 }
