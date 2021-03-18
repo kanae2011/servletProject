@@ -20,6 +20,7 @@ import com.webjjang.image.service.ImageViewService;
 import com.webjjang.image.service.ImageWriteService;
 import com.webjjang.member.controller.MemberController;
 import com.webjjang.member.dao.MemberDAO;
+import com.webjjang.member.service.MemberCheckIdService;
 import com.webjjang.member.service.MemberGradeModifyService;
 import com.webjjang.member.service.MemberJoinService;
 import com.webjjang.member.service.MemberListService;
@@ -28,6 +29,7 @@ import com.webjjang.member.service.MemberViewService;
 import com.webjjang.message.controller.MessageController;
 import com.webjjang.message.dao.MessageDAO;
 import com.webjjang.message.service.MessageDeleteService;
+import com.webjjang.message.service.MessageGetMessageCntService;
 import com.webjjang.message.service.MessageListService;
 import com.webjjang.message.service.MessageViewService;
 import com.webjjang.message.service.MessageWriteService;
@@ -103,6 +105,7 @@ public class Init extends HttpServlet {
 				
 		//service 생성 저장
 		Beans.put("/member/join.do", new MemberJoinService());
+		Beans.put("/ajax/checkId.do", new MemberCheckIdService());
 		Beans.put("/member/login.do", new MemberLoginService());
 		Beans.put("/member/list.do", new MemberListService());
 		Beans.put("/member/gradeModify.do", new MemberGradeModifyService());
@@ -113,6 +116,7 @@ public class Init extends HttpServlet {
 		
 		//service에 dao 넣기 - 조립
 		Beans.get("/member/join.do").setDAO(Beans.getDAO("memberDAO"));
+		Beans.get("/ajax/checkId.do").setDAO(Beans.getDAO("memberDAO"));
 		Beans.get("/member/login.do").setDAO(Beans.getDAO("memberDAO"));
 		Beans.get("/member/list.do").setDAO(Beans.getDAO("memberDAO"));
 		Beans.get("/member/gradeModify.do").setDAO(Beans.getDAO("memberDAO"));
@@ -172,6 +176,7 @@ public class Init extends HttpServlet {
 		Beans.put("/message/view.do", new MessageViewService());
 		Beans.put("/message/write.do", new MessageWriteService());
 		Beans.put("/message/delete.do", new MessageDeleteService());
+		Beans.put("/ajax/getMessageCnt.do", new MessageGetMessageCntService());
 		System.out.println("MessageWriteService : " +  Beans.get("/message/write.do"));
 		
 		//주의: key가 다르면 null이 나옴."/message/list.do" -> new MessageListService / "messageDAO" -> MessageDAO
@@ -179,6 +184,7 @@ public class Init extends HttpServlet {
 		Beans.get("/message/view.do").setDAO(Beans.getDAO("messageDAO"));
 		Beans.get("/message/write.do").setDAO(Beans.getDAO("messageDAO"));
 		Beans.get("/message/delete.do").setDAO(Beans.getDAO("messageDAO"));
+		Beans.get("/ajax/getMessageCnt.do").setDAO(Beans.getDAO("messageDAO"));
 		System.out.println("messageDAO : " + Beans.getDAO("messageDAO"));
 		
 		
