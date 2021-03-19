@@ -2,8 +2,10 @@ package com.webjjang.board.controller;
 
 import java.util.List;
 
+
 import javax.servlet.http.HttpServletRequest;
 
+import com.webjjang.board.vo.BoardReplyVO;
 import com.webjjang.board.vo.BoardVO;
 import com.webjjang.main.controller.Beans;
 import com.webjjang.main.controller.Controller;
@@ -37,7 +39,10 @@ public class BoardController implements Controller {
 		//2.게시판 보기
 		case "/" +  MODULE + "/view.do":
 			//service - dao --> request에 저장 해줌 
-			view(request);
+			//글보기를 하는 데이터 가져오기.댓글 때문에 글 번호를 다시 돌려줌 
+			//Long no = view(request);
+			//글보기 할 때 댓글 목록 가져오기 
+			replyList(view(request),pageObject,request); 
 			//"view/list 넘김-> /WEB-INF/views/board/view.jsp를 이용해서 HTML을 만듦"
 			jspInfo = MODULE + "/view";
 			break;
@@ -63,10 +68,11 @@ public class BoardController implements Controller {
 		//4-2.게시판 글수정 처리
 		case "/" +  MODULE + "/update.do":
 			//service - dao --> request에 저장 해줌 
-			Long no = update(request);
+			//Long no = update(request);
 			//"view.do" 넘김-> /view.do로 자동이동
-			jspInfo = "redirect:view.do?no=" + no + "&inc=0&page=" + pageObject.getPage() + "&perPageNum=" + pageObject.getPerPageNum();
+			jspInfo = "redirect:view.do?no=" + update(request) + "&inc=0&page=" + pageObject.getPage() + "&perPageNum=" + pageObject.getPerPageNum();
 			break;
+		
 		
 		//5.게시판 글삭제 처리
 		case "/" +  MODULE + "/delete.do":
@@ -76,6 +82,20 @@ public class BoardController implements Controller {
 			jspInfo = "redirect:list.do?page=1&perPageNum=" + pageObject.getPerPageNum();
 			break;
 		
+			
+		//6-1.게시판 댓글등록 처리
+		case "/" +  MODULE + "/replyWrite.do":
+			replyWrite(request);
+			System.out.println("BoardCoontroller[query] : " + request.getQueryString());	
+			//"view.do" 넘김-> /view.do로 자동이동
+			jspInfo = "redirect:view.do?" + request.getQueryString() + "&inc=0";
+			break;
+		
+		//6-2.게시판 댓글 수정 처리
+		case "/" +  MODULE + "/replyUpdate.do":
+			//"view.do" 넘김-> /view.do로 자동이동
+			jspInfo = "redirect:view.do?no=" + request.getParameter("no") + "&inc=0";
+			break;
 		default:
 			throw new Exception("페이지 요청 중 오류 발생- 존재하지 않는 페이지입니다.");
 		}
@@ -96,7 +116,8 @@ public class BoardController implements Controller {
 	}
 	
 	//2.게시판 보기 처리
-	private void view(HttpServletRequest request) throws Exception{
+	//return type을 Long 으로 한 이유 : 댓글을 가져오려면 글 번호가 필요하므로 타입을 Long
+	private Long view(HttpServletRequest request) throws Exception{
 		//servlet-controller(*)-DAO-view.do
 		//넘어오는 데이터 받기
 		String strNo = request.getParameter("no");
@@ -104,10 +125,13 @@ public class BoardController implements Controller {
 		String strInc = request.getParameter("inc");
 		long inc = Long.parseLong(strInc);
 
+		//게시판 글보기 데이터 1개 가져오기
 		BoardVO vo = (BoardVO)ExeService.execute(Beans.get(AuthorityFilter.url), new Long[]{no,inc});
 
 		//서버 객체 requset 에 담음
 		request.setAttribute("vo", vo);
+		
+		return no;
 	}
 	
 	//3.게시판 글쓰기
@@ -166,6 +190,7 @@ public class BoardController implements Controller {
 		return no;
 	}
 	
+	//5.게시판 글삭제
 	private void delete(HttpServletRequest request)throws Exception{
 		String strNo = request.getParameter("no");
 		long no = Long.parseLong(strNo);
@@ -175,6 +200,32 @@ public class BoardController implements Controller {
 		Integer result = (Integer)ExeService.execute(Beans.get(url),no);
 		
 		if(result==0)throw new Exception("게시판 글삭제 오류-삭제할 글이 존재하지 않습니다.");
+	}
+	
+	//6.게시판 댓글 목록 가져오기
+	private void replyList(Long no,PageObject pageObject,HttpServletRequest request) throws Exception {
+		//DB에서 데이터 가져오기
+		//연결 URL -> /board/view.do -> 게시판 글보기 
+		//댓글 목록은 URL이 존재하지 않으나 데이터를 가져오기 위해 강제 셋팅 
+		
+		request.setAttribute("replyList",
+				ExeService.execute(Beans.get("/board/replyList.do"),new Object[]{no,pageObject}));
+	}
+	
+	//7.게시판 댓글 등록
+	private void replyWrite(HttpServletRequest request)throws Exception {
+		String strNo = request.getParameter("no");
+		String content = request.getParameter("content");
+		String writer = request.getParameter("writer");
+		
+		BoardReplyVO vo = new BoardReplyVO();
+		vo.setNo(Long.parseLong(strNo));
+		vo.setContent(content);
+		vo.setWriter(writer);
+		
+		//정보를 출력하는 필터 처리
+		ExeService.execute(Beans.get(AuthorityFilter.url), vo);
+		
 	}
 	
 }
