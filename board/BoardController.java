@@ -202,7 +202,7 @@ public class BoardController implements Controller {
 		if(result==0)throw new Exception("게시판 글삭제 오류-삭제할 글이 존재하지 않습니다.");
 	}
 	
-	//6.게시판 댓글 목록 가져오기
+	//6-1.게시판 댓글 목록 가져오기
 	private void replyList(Long no,PageObject pageObject,HttpServletRequest request) throws Exception {
 		//DB에서 데이터 가져오기
 		//연결 URL -> /board/view.do -> 게시판 글보기 
@@ -212,7 +212,7 @@ public class BoardController implements Controller {
 				ExeService.execute(Beans.get("/board/replyList.do"),new Object[]{no,pageObject}));
 	}
 	
-	//7.게시판 댓글 등록
+	//6-2.게시판 댓글 등록
 	private void replyWrite(HttpServletRequest request)throws Exception {
 		String strNo = request.getParameter("no");
 		String content = request.getParameter("content");
