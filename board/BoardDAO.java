@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webjjang.board.vo.BoardReplyVO;
 import com.webjjang.board.vo.BoardVO;
 import com.webjjang.util.db.DBInfo;
 import com.webjjang.util.db.DBSQL;
@@ -234,4 +235,110 @@ public class BoardDAO {
 		}
 		return result;
 	}
+	
+	//6-1.게시판 댓글 목록
+	public List<BoardReplyVO> replyList(Long no,PageObject pageObject) throws Exception{
+		
+		//넘어오는 데이터 확인
+		 System.out.println("BoardDAO.list().no/pageObject : " + no + "/"+ pageObject);
+		
+		List<BoardReplyVO> replyList = null;
+		try {
+			//1.드라이버 확인은 DBInfo + 2.연결
+			con = DBInfo.getConnection();
+			System.out.println("BoardDAO.replyList().con : " + con);
+			//3.sql -> DBSQL + 4.실행객체 + 데이터 셋팅
+			System.out.println("BoardDAO.replyList().DBSQL.BOARD_REPLY_LIST:" + DBSQL.BOARD_REPLY_LIST);
+			pstmt = con.prepareStatement(DBSQL.BOARD_REPLY_LIST);
+			pstmt.setLong(1, no); // 게시판 글번호
+//			pstmt.setLong(2, pageObject.getStartRow()); // 시작 번호 
+//			pstmt.setLong(3, pageObject.getEndRow()); // 끝 번호 
+			//강제로 1페이지 설정 
+			pstmt.setLong(2,1); // 시작 번호 
+			pstmt.setLong(3,10); // 끝 번호 
+			//5.실행
+			rs = pstmt.executeQuery();
+			System.out.println("rs" + rs);
+			//6.표시 -> 데이터 담기 
+			if(rs != null) {
+				while(rs.next()) {
+					if (replyList == null) replyList = new ArrayList<>();
+					BoardReplyVO vo = new BoardReplyVO();
+					vo.setRno(rs.getLong("rno"));
+					vo.setNo(rs.getLong("no"));
+					vo.setContent(rs.getString("content"));
+					vo.setWriter(rs.getString("writer"));
+					vo.setWriteDate(rs.getString("writeDate"));
+					
+					replyList.add(vo);
+					System.out.println("vo:" + vo);
+				}
+			}
+		}catch (Exception e) {
+			//개발자를 위한 오류 콘솔
+		e.printStackTrace();
+		//사용자를 위한 오류처리
+		throw new Exception("게시판 댓글 목록 실행 중 DB처리 오류 ");
+			
+	    }finally {
+			DBInfo.close(con, pstmt, rs);
+		}
+		System.out.println("<BoardReplyVO> replyList : " + replyList);
+		return replyList;
+	}
+	
+	//6-2.댓글 전체 갯수 구하기
+	public long getReplyTotalRow(Long no) throws Exception{
+		System.out.println("BoardDAO.getReplyTotalRow().no" + no);
+		
+		long result = 0;
+		try {
+			con=DBInfo.getConnection();
+			pstmt= con.prepareStatement(DBSQL.BOARD_GET_REPLY_TOTALROW);
+			pstmt.setLong(1, no);
+			rs=pstmt.executeQuery();
+			System.out.println("BoardDAO.getReplyTotalRow().rs : " + rs);
+			
+			//rs출력은 가능하나 rs.next()는 데이터가 넘어가므로 안됨 
+			if(rs!=null && rs.next()) {
+				result = rs.getLong(1);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+;		throw new Exception("게시판 댓글 전제 갯수 가져오는  DB처리중 오류");
+		}finally {
+			DBInfo.close(con, pstmt,rs);
+		}
+		System.out.println("BoardDAO.getTotlaRow().result : " + result);
+		return result;
+	}
+	
+	//6-3.댓글 등록
+	public int replyWrite(BoardReplyVO vo) throws Exception{
+		int result = 0;
+		try {
+			//1.드라이버 확인은 DBInfo + 2.연결
+			con = DBInfo.getConnection();
+			//3.sql -> DBSQL + 4.실행객체 + 데이터 셋팅
+			pstmt = con.prepareStatement(DBSQL.BOARD_REPLY_WRITE);
+			pstmt.setLong(1, vo.getNo()); 
+			pstmt.setString(2, vo.getContent()); 
+			pstmt.setString(3, vo.getWriter()); 
+			//5.실행 -데이터 한개 발생, 반복문 필요X
+			result = pstmt.executeUpdate();
+			System.out.println("게시판 댓글 등록 성공");
+			//6.표시 -> 데이터 담기 
+		}catch (Exception e) {
+			//개발자를 위한 오류 콘솔
+		e.printStackTrace();
+		//사용자를 위한 오류처리
+		throw new Exception("게시판 댓글등록 실행 중 DB처리 오류 ");
+			
+	    }finally {
+			DBInfo.close(con, pstmt);
+		}
+		return result;
+	}
+	
 }
