@@ -9,6 +9,8 @@ import com.webjjang.board.controller.BoardController;
 import com.webjjang.board.dao.BoardDAO;
 import com.webjjang.board.service.BoardDeleteService;
 import com.webjjang.board.service.BoardListService;
+import com.webjjang.board.service.BoardReplyListService;
+import com.webjjang.board.service.BoardReplyWriteService;
 import com.webjjang.board.service.BoardUpdateService;
 import com.webjjang.board.service.BoardViewService;
 import com.webjjang.board.service.BoardWriteService;
@@ -85,6 +87,9 @@ public class Init extends HttpServlet {
 		Beans.put("/board/write.do", new BoardWriteService());
 		Beans.put("/board/update.do", new BoardUpdateService());
 		Beans.put("/board/delete.do", new BoardDeleteService());
+		//없는 URL이지만 게시판 글보기 할 때 함께 실행해서 데이터를 가져감 
+		Beans.put("/board/replyList.do", new BoardReplyListService());
+		Beans.put("/board/replyWrite.do", new BoardReplyWriteService());
 		
 		//service에 dao 넣기 - 조립
 		Beans.get("/board/list.do").setDAO(Beans.getDAO("boardDAO"));
@@ -92,6 +97,8 @@ public class Init extends HttpServlet {
 		Beans.get("/board/write.do").setDAO(Beans.getDAO("boardDAO"));
 		Beans.get("/board/update.do").setDAO(Beans.getDAO("boardDAO"));
 		Beans.get("/board/delete.do").setDAO(Beans.getDAO("boardDAO"));
+		Beans.get("/board/replyList.do").setDAO(Beans.getDAO("boardDAO"));
+		Beans.get("/board/replyWrite.do").setDAO(Beans.getDAO("boardDAO"));
 		
 		//생성,저장이 잘되어 있는지 출력
 		System.out.println(Beans.get("/board/list.do"));
